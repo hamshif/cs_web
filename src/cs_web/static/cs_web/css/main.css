@@ -1,0 +1,45 @@
+
+body
+{
+  min-width: 550px;      /* 2x LC width + RC width */
+}
+
+.progress_message
+{
+	color: #6B0024;
+}
+
+#header
+{
+	text-align: center;
+}
+
+.main, .sidebar 
+{  
+    float: none;  
+    padding: 20px;  
+    vertical-align: top;  
+}
+  
+.container 
+{  
+    display: table;  
+}
+  
+.main 
+{  
+    width: 400px;  
+    background-color: #87cefa;
+    display: table-cell;  
+}
+  
+.sidebar 
+{  
+    width: 200px;  
+    display: table-cell;  
+    background-color: tomato;  
+}  
+
+
+
+
