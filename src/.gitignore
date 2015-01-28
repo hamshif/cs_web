@@ -1,8 +1,0 @@
-cs_web/settings.py
-manage.py
-*~
-/static
-.DS_Store
-._.*
-*__pycache__*
-*.pyc
