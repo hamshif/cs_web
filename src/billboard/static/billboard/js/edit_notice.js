@@ -30,6 +30,7 @@ EditNotice.prototype.populateNotices = function ()
 
     $tx_creator.val('');
     $ta_notice_text.val('');
+    $img_notice.attr('src', '/static/billboard/img/bugs.jpeg');
 
     $select_creator.empty();
     $select_notices.empty();

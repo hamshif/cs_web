@@ -186,7 +186,7 @@ var Notice_CMS_GUI = Object.extend(Object,
                         type:"button",
                         id: "b_submit_notice",
                         value: "Submit Notice",
-                        click: function(){notice_gui.sendFormData(baseMap);}
+                        click : function(){notice_gui.edit_notice(baseMap, false, true);}
                     }
                 );
 
@@ -202,11 +202,10 @@ var Notice_CMS_GUI = Object.extend(Object,
                             baseMap.map['notices'][baseMap.focused_notice_index]['text'] = $ta_notice_text.val();
                             baseMap.map['notices'][baseMap.focused_notice_index]['creator'] = $tx_creator.val();
 
-                            notice_gui.edit_notice_xhr(baseMap, false);
+                            notice_gui.edit_notice(baseMap, false);
                         }
                     }
                 );
-
 
 
                 $dev_notice_edit.append($b_edit_notice);
@@ -219,7 +218,7 @@ var Notice_CMS_GUI = Object.extend(Object,
                         value: "Delete Notice",
                         click: function()
                         {
-                            notice_gui.edit_notice_xhr(baseMap, true);
+                            notice_gui.edit_notice(baseMap, true);
                         }
                     }
                 );
@@ -269,68 +268,13 @@ var Notice_CMS_GUI = Object.extend(Object,
         },
 
 
-        edit_notice_ajax : function(baseMap, _delete)
+        edit_notice : function(baseMap, _delete, _create)
         {
-            console.log('fakashta');
+            _create = typeof _create !== 'undefined' ? _create : false;
 
-            if(baseMap.focused_notice_index === undefined)
-            {
-                alert('Please choose a notice to edit!');
-                return;
-            }
-
-            console.log(this);
-
-            $.ajax({
-                url: baseMap.submit_url,
-                type: 'POST',
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify(
-                    {
-                        'id': baseMap.map['notices'][baseMap.focused_notice_index]['id'],
-                        'text': baseMap.map['notices'][baseMap.focused_notice_index]['text'],
-                        'creator': baseMap.map['notices'][baseMap.focused_notice_index]['creator'],
-                        'client_index': baseMap.focused_notice_index,
-                        'delete': _delete
-                    }),
-                dataType: 'json',
-//                _callback : edit_notice.editCallback,
-                context: this,
-                beforeSend: function(xhr)
-                {
-                    console.log('xhr', xhr);
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                },
-
-                success: function(json)
-                {
-                    console.log(json);
-
-                    if(json['message'] == 'deleted')
-                    {
-                        baseMap.map['notices'].splice(json['client_index'], 1);
-                        baseMap.focused_notice_index = undefined;
-
-                        baseMap.populateNotices();
-                    }
-                    else if(json['message'] == 'edited')
-                    {
-                        baseMap.map['notices'].splice(json['client_index'], 1, json['new_value']);
-                        baseMap.focused_notice_index = json['client_index'];
-
-                        baseMap.populateNotices();
-                    }
-
-
-                }
-            });
-        },
-
-        edit_notice_xhr : function(baseMap, _delete)
-        {
             console.log('Shrubbery');
 
-            if(baseMap.focused_notice_index === undefined)
+            if(!_create && baseMap.focused_notice_index === undefined)
             {
                 alert('Please choose a notice to edit!');
                 return;
@@ -352,16 +296,25 @@ var Notice_CMS_GUI = Object.extend(Object,
 
             var formData = new FormData();
 
-            formData.append('create', 'false');
-            formData.append('id', baseMap.map['notices'][baseMap.focused_notice_index]['id']);
-            formData.append('client_index', baseMap.focused_notice_index);
+            var j = {};
+
+//            var j = JSON.stringify({'message': 'cripes', 'num': 5, 'ar': [1,4,6, '888', true], 'sanity_check': "ablaabooda; cramshankboora/ - \ / {}  [[]]'' /// : "});
+//            formData.append('j', j);
+
+            j['create'] = _create;
+
+            if(!_create)
+            {
+                j['id'] = baseMap.map['notices'][baseMap.focused_notice_index]['id'];
+                j['client_index'] = baseMap.focused_notice_index;
+            }
 
 
             if(!_delete)
             {
-                formData.append('_delete', 'false');
-                formData.append('creator', $tx_creator.val());
-                formData.append('text', $ta_notice_text.val());
+                j['_delete'] = false;
+                j['creator'] = $tx_creator.val();
+                j['text'] = $ta_notice_text.val();
 
                 var files = $input_file[0].files;
 
@@ -381,9 +334,10 @@ var Notice_CMS_GUI = Object.extend(Object,
             }
             else
             {
-                formData.append('_delete', 'true');
+                j['_delete'] = true;
             }
 
+            formData.append('j', JSON.stringify(j));
 //			console.log("formData");
 //			console.log(formData.toString());
 
@@ -416,11 +370,12 @@ var Notice_CMS_GUI = Object.extend(Object,
                     baseMap.populateNotices();
                 }
             };
-            xhr.open('POST', "/billboard/set_notice/", true);
+            xhr.open('POST', "/billboard/edit_notice/", true);
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
         //	console.log(xhr);
 
             xhr.send(formData);
         }
+
 	}
 ).implement(BaseGUI);
