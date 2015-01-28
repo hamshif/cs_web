@@ -135,5 +135,54 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 print('STATIC_ROOT: ', STATIC_ROOT)
 
 
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '[%(levelname)s] [%(asctime)s %(module)s %(lineno)s] %(process)d %(thread)d %(message)s',
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
+        'simple': {
+            'format': '[%(levelname)s %(asctime)s] %(module)s %(lineno)s:  %(message)s',
+            'datefmt' : "%H:%M:%S"
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+            },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'file.log'),
+            'formatter': 'simple'
+            },
+        },
+    'loggers': {
+
+        'billboard': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
 
 
+        # '': {
+        #     'handlers': ['console'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        #     },
+        # This is useful for viewing DB queries
+        # 'django': {
+        #     'handlers': ['console'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        #     },
+        }
+    }
+
+# if DEBUG:
+#     # make all loggers use the console.
+#     for logger in LOGGING['loggers']:
+#         LOGGING['loggers'][logger]['handlers'] = ['console']

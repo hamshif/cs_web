@@ -1,4 +1,4 @@
-import os, sys, traceback, json
+import os, sys, traceback, json,logging
 
 from datetime import datetime
 
@@ -20,6 +20,14 @@ from cs_res.util import respond_html, save_uploaded_file, validatePath
 from cs_web import settings
 
 
+
+logger = logging.getLogger(__name__)
+
+
+
+
+
+
 @never_cache
 def CMS(request):
 
@@ -32,7 +40,8 @@ def edit_notice(request):
 
     """
     """
-    print('edit_notice')
+    logger.debug("this is a debug message!")
+
 
     r = {}
 
@@ -40,19 +49,19 @@ def edit_notice(request):
 
         p = request.POST
 
-        # print('request')
-        # print(request)
+        # logger.debug('request')
+        # logger.debug(request)
 
         if not request.is_ajax():
 
-            print("request isn't ajax")
+            logger.debug("request isn't ajax")
 
             r['special message'] = "request isn't ajax"
 
         try:
 
             j = (p.__getitem__('j'))
-            print('j: ', j)
+            logger.debug('j: ' + j)
 
             j = json.loads(j)
 
@@ -63,14 +72,14 @@ def edit_notice(request):
                 r['client_index'] = j['client_index']
 
                 notice_id = j['id']
-                print('notice_id: ', str(notice_id))
+                logger.debug('notice_id: ' + str(notice_id))
 
                 notice = Notice_Model.objects.get(pk = notice_id)
 
                 r['message'] = "created"
 
                 _delete = j['_delete']
-                print('_delete: ', _delete)
+                logger.debug('_delete: ' + str(_delete))
 
 
                 if _delete:
@@ -89,10 +98,10 @@ def edit_notice(request):
                 else:
 
                     i_creator = j['creator']
-                    print('creator: ', i_creator)
+                    logger.debug('creator: ' + i_creator)
 
                     i_text = j['text']
-                    print('text: ', i_text)
+                    logger.debug('text: ' + i_text)
 
                     notice.creator = i_creator
                     notice.text = i_text
@@ -102,10 +111,10 @@ def edit_notice(request):
             else:
 
                 i_creator = j['creator']
-                print('creator: ', i_creator)
+                logger.debug('creator: '+ i_creator)
 
                 i_text = j['text']
-                print('text: ', i_text)
+                logger.debug('text: ' + i_text)
 
                 notice = Notice_Model.objects.create(
                     creator = i_creator,
@@ -134,11 +143,11 @@ def edit_notice(request):
 
                 up_file = request.FILES['input_file']
 
-                print('up_file.name: ', up_file.name)
+                logger.debug('up_file.name: ' + up_file.name)
 
-                # print('data type:', type(up_file))
+                # logger.debug('data type:', type(up_file))
 
-                # print('data.read() type: ', type(up_file.read()))
+                # logger.debug('data.read() type: ', type(up_file.read()))
 
                 path_ = os.path.join(settings.NOTICE_FILES_DIR, notice.creator)
 
@@ -150,7 +159,7 @@ def edit_notice(request):
                     if save_uploaded_file(up_file, os.path.join(path_, str(notice.pk) + '_' + up_file.name)):
 
                         img_stored = True
-                        print('file saved')
+                        logger.debug('file saved')
 
                         # TODO delete old notice file from disk
 
@@ -158,7 +167,7 @@ def edit_notice(request):
 
                     else:
 
-                        print("couldn't save uploaded file")
+                        logger.debug("couldn't save uploaded file")
 
 
             notice.save()
@@ -166,8 +175,9 @@ def edit_notice(request):
             r['notice'] = notice.as_dict()
 
         except Exception:
-            print('exception: ', sys.exc_info)
+
             traceback.print_exc()
+            print('exception: ' , sys.exc_info)
 
             r['message'] = sys.exc_info
 
@@ -184,7 +194,7 @@ def edit_notice(request):
 def edit_notice_followup(request):
     """
     """
-    print('edit_notice_followup')
+    logger.debug('')
     try:
 
         if request.is_ajax():
@@ -192,11 +202,11 @@ def edit_notice_followup(request):
 
                 j = json.loads(request.body.decode("utf-8"))
 
-                print('j: ', j)
+                logger.debug('j: ' + j)
 
 
         j['message'] = 'followup'
-        print("j['counter']:", j['counter'])
+        logger.debug("j['counter']:" + j['counter'])
 
 
     except Exception:
@@ -206,7 +216,7 @@ def edit_notice_followup(request):
 
 
 
-    print("type(j): ", type(j))
+    logger.debug("type(j): " + type(j))
 
     r = j
     # r['counter'] = counter
@@ -216,7 +226,7 @@ def edit_notice_followup(request):
         r['random_stam'] = randint(0,9)
 
     except Exception:
-        print('exception: ', sys.exc_info)
+        print('exception: ' , sys.exc_info)
         traceback.print_exc()
 
 
@@ -273,7 +283,7 @@ def notice_map(request):
 @never_cache
 def notice(request):
 
-    print('pssss')
+    logger.debug('pssss')
 
 
     r = {}
@@ -283,7 +293,7 @@ def notice(request):
         r['text'] = randint(0,9)
 
     except Exception:
-        print('exception: ', sys.exc_info)
+        print('exception: ' , sys.exc_info)
         traceback.print_exc()
 
 
@@ -313,7 +323,7 @@ def notice_followup(request):
 
     """
     """
-    # print('notice_followup')
+    # logger.debug('notice_followup')
     try:
 
         if request.is_ajax():
@@ -321,11 +331,11 @@ def notice_followup(request):
 
                 j = json.loads(request.body.decode("utf-8"))
 
-                # print('j: ', j)
+                # logger.debug('j: ' + j)
 
 
         j['message'] = 'followup'
-        # print("j['counter']:", j['counter'])
+        # logger.debug("j['counter']:" + j['counter'])
 
         j['text'] = randint(0,9)
 
@@ -347,7 +357,7 @@ def notice_followup(request):
 
         d_notices.append(notices[random_index].as_dict())
 
-        # print(d_notices)
+        # logger.debug(d_notices)
 
         # for notice in notices:
         #
@@ -362,8 +372,8 @@ def notice_followup(request):
         traceback.print_exc()
 
 
-    # print("type(j): ", type(j))
-    # print("j: ", j)
+    # logger.debug("type(j): " + type(j))
+    # logger.debug("j: " + j)
 
     return HttpResponse(json.dumps(j))
 
@@ -372,36 +382,37 @@ def notice_followup(request):
 def get_image(request):
     """
     """
-#     print('')
-#     print('reached getImage')
-#     print('')
-
-    g = request.GET
-
-    relative_path = g.__getitem__('image_full_path')
-#     print('relative_path:', relative_path)
-    full_path = os.path.join(settings.NOTICE_FILES_DIR, relative_path)
-#     print('full_path: ', full_path)
+    logger.debug('')
+#     logger.debug('reached getImage')
+#     logger.debug('')
 
     try:
+        g = request.GET
+
+        relative_path = g.__getitem__('image_full_path')
+    #     logger.debug('relative_path:' + relative_path)
+        full_path = os.path.join(settings.NOTICE_FILES_DIR, relative_path)
+    #     logger.debug('full_path: ' + full_path)
+
+
         image_data = open(full_path, "rb").read()
 
     except Exception:
-        print('exception: ', sys.exc_info)
+        print('exception: ' , sys.exc_info)
         traceback.print_exc()
 
-        print('because of error returning default image')
+        logger.debug('because of error returning default image')
 
         try:
             path = os.path.join(settings.STATIC_ROOT, 'billboard/img/bugs.jpeg')
 
-#             print('returning empty')
+#             logger.debug('returning empty')
 
             image_data = open(path, "rb").read()
             return HttpResponse(image_data, content_type="image/jpeg")
 
         except Exception:
-            print('exception: ', sys.exc_info)
+            print('exception: ' , sys.exc_info)
             traceback.print_exc()
 
     return HttpResponse(image_data, content_type="image/jpeg")
